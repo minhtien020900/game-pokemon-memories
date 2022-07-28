@@ -1,12 +1,45 @@
 <template>
-  <div class="card">
+  <div
+    class="card"
+    :class="{ disabled: isDisabled }"
+    :style="{
+      height: `${
+        (this.heightBrowser - 16 * 4) / Math.sqrt(cardsContext.length) - 16
+      }px`,
+      width: `${
+        (((this.heightBrowser - 16 * 4) / Math.sqrt(cardsContext.length) - 16) *
+          3) /
+        4
+      }px`,
+      perspective: `${
+        ((((this.heightBrowser - 16 * 4) / Math.sqrt(cardsContext.length) -
+          16) *
+          3) /
+          4) *
+        2
+      }px`,
+    }"
+  >
     <div
       class="card_inner"
       :class="{ ' is-flipped ': isFlipped }"
       @click="onToggle"
     >
       <div class="card_face card_face--front">
-        <div class="card_content"></div>
+        <div
+          class="card_content"
+          :style="{
+            backgroundSize: `${
+              (((920 - 16 * 4) / Math.sqrt(cardsContext.length) - 16) * 3) /
+              4 /
+              3
+            }px ${
+              (((920 - 16 * 4) / Math.sqrt(cardsContext.length) - 16) * 3) /
+              4 /
+              3
+            }px`,
+          }"
+        ></div>
       </div>
       <div class="card_face card_face--back">
         <div
@@ -30,38 +63,63 @@ export default {
       required: true,
     },
     indexCard: {
-      type: String,
+      type: [String, Number],
+    },
+    arrCardFlipped: {
+      type: [Array],
+    },
+    cardsContext: {
+      type: Array,
+      default: () => {
+        return [];
+      },
     },
   },
 
   data() {
     return {
       isFlipped: false,
+      isDisabled: false,
+      heightBrowser: 0,
     };
+  },
+  mounted() {
+    this.heightBrowser = document.querySelector(".screen").clientHeight;
   },
   computed: {
     imageComputed() {
-      return this.indexCard + ".png";
+      return this.card.value + ".png";
     },
   },
   methods: {
     onToggle() {
+      if (this.arrCardFlipped.length === 2) {
+        return false;
+      }
+      if (this.isDisabled) return false;
       this.isFlipped = !this.isFlipped;
       if (this.isFlipped) {
         this.$emit("onSelectCard", this.card);
       }
+    },
+    cardDown() {
+      return (this.isFlipped = false);
+    },
+    disableCard() {
+      return (this.isDisabled = true);
     },
   },
 };
 </script>
 
 <style scoped lang="css">
+.card .card_inner .disabled {
+}
+
 .card {
   display: inline-flex;
   margin-right: 1rem;
   margin-bottom: 1rem;
-  width: 80px;
-  height: 120px;
 }
 
 .card_inner {
@@ -97,8 +155,8 @@ export default {
   background: url("../assets/images/icon_back.png") no-repeat center center;
   height: 100%;
   width: 100%;
-  background-size: 40px 40px;
 }
+
 .card_face.card_face--back .card_content {
   background-position: center center;
   background-repeat: no-repeat;

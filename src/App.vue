@@ -7,25 +7,33 @@
     <interact-screen
       :cardContext="settings.cardContext"
       v-else-if="statusMatch === 'match'"
+      @onFinish="finishGame()"
     ></interact-screen>
-    <coppy-right></coppy-right>
+    <result-screen
+      v-else-if="this.statusMatch === 'result'"
+      :timeFinish="timeFinish"
+      @onStartAgain="onStartAgain"
+    ></result-screen>
+    <copy-right />
   </div>
 </template>
 
 <script>
 import MainScreen from "./components/MainScreen";
-import CoppyRight from "./components/CoppyRight";
 import InteractScreen from "./components/InteractScreen";
+import CopyRight from "./components/CoppyRight";
 import "./assets/styles/global.css";
+
 import { shuffled } from "./utils/array";
+import ResultScreen from "./components/ResultScreen";
 // import ResultScreen from "./components/ResultScreen";
 export default {
   name: "App",
   components: {
+    ResultScreen,
     InteractScreen,
     MainScreen,
-    CoppyRight,
-    // ResultScreen,
+    CopyRight,
   },
   data() {
     return {
@@ -35,6 +43,7 @@ export default {
         cardContext: [],
         startedAt: null,
       },
+      timeFinish: 0,
     };
   },
   methods: {
@@ -55,6 +64,13 @@ export default {
       const cards = [...firstCards, ...secondCards];
       this.settings.cardContext = shuffled(shuffled(shuffled(shuffled(cards))));
       this.settings.startedAt = new Date().getTime();
+    },
+    finishGame() {
+      this.timeFinish = new Date().getTime() - this.settings.startedAt;
+      this.statusMatch = "result";
+    },
+    onStartAgain() {
+      this.statusMatch = "default";
     },
   },
 };
